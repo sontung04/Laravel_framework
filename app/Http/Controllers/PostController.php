@@ -65,6 +65,9 @@ class PostController extends Controller
     public function update(Request $request, $id) {
         //
     }
+    public function updateID($id) {
+        return 2;
+    }
 
     /**
      * Remove the specified post from storage.
