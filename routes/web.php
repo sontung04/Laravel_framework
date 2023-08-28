@@ -6,9 +6,8 @@ Route::get('/' , function() {
 })->name('home');
 Route::prefix('post') -> group( function () {
 
-    Route::get('/index' , function(){ //hiển thị danh sách post trong blog
-        return view('index');
-    })->name('index');
+    Route::get('/index' , 'PostController@index') //hiển thị danh sách post trong blog
+    ->name('index');
 
     Route::get('/create' , function() { //hiển thị form để thêm 1 post
         return view('create');
