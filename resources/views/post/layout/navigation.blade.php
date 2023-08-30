@@ -1,8 +1,8 @@
-@extends('layout.index')
+@extends('post.layout.index')
 @section('navigation')
 <div class="container-fluid position-relative p-0">
     <nav class="navbar navbar-expand-lg navbar-dark px-5 py-3 py-lg-0">
-        <a href="index.html" class="navbar-brand p-0">
+        <a href="{{route('home')}}" class="navbar-brand p-0">
             <h1 class="m-0"><i class="fa fa-user-tie me-2"></i>Blog</h1>
         </a>
         <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarCollapse">
@@ -41,9 +41,9 @@
             </div>
             <div class="modal-body d-flex align-items-center justify-content-center">
                 <div class="input-group" style="max-width: 600px;">
-                    <form action="{{route('detail', [2])}}" method="GET">
+                    <form action="{{route('detailID')}}" method="POST"> <!--Form điền ID để hiện post-->
                         @csrf
-                        <input type="text" class="form-control bg-transparent border-primary p-3" name="ID" placeholder="Type post id">
+                        <input type="text" class="form-control bg-transparent border-primary p-3" name="id" placeholder="Type post id">
                         <button type="submit" class="btn btn-primary px-4"><i class="bi bi-search"></i></button>
                     </form>
                 </div>

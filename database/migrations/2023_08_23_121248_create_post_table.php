@@ -20,7 +20,7 @@ class CreatePostTable extends Migration
             $table->text('description')->nullable();
             $table->text('type');
             $table->text('img')->nullable();
-            $table->integer('blogger_id');
+            $table->integer('user_id');
         });
     }
 

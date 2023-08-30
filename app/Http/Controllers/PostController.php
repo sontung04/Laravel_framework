@@ -3,7 +3,9 @@
 namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
-use app\Models\Post;
+use App\Models\Post;
+use App\Models\User;
+use Illuminate\Support\Facades\DB;
 class PostController extends Controller
 {
     /**
@@ -12,7 +14,11 @@ class PostController extends Controller
      * @return \Illuminate\Http\Response
      */
     public function index() {
-        return view( 'index' , [ 'index' => 1 ] );
+        $posts = DB::table('posts')
+                    ->join('users' , 'posts.user_id' , '=' , 'users.id')
+                    ->select('posts.*','users.name')
+                    ->get();
+        return view( 'post.index' , [ 'posts' => $posts ] );
     }
 
     /**
@@ -21,7 +27,7 @@ class PostController extends Controller
      * @return \Illuminate\Http\Response
      */
     public function create() {
-        return view('create');
+        return view('post.create');
     }
 
     /**
@@ -33,8 +39,21 @@ class PostController extends Controller
     public function store(Request $request)
     {
         $post = $request->all();
-        Post::create($post);
-        return 'post created';
+        $post['name'] = ucfirst( strtolower( $post['name'] ) ); //Viết hoa ký tự đầu của tên và chuyển đổi các ký tự còn lại sang chữ thường
+        $user = User::firstOrCreate(['name' => $post['name']]); //Lấy dữ liệu trong bảng users nếu tồn tại hoặc tạo và lấy dữ liệu nếu không tồn tại
+        DB::insert('insert into posts (title, description, type, img, user_id) value (?, ?, ?, ?, ?)' , [$post['title'] , $post['description'] , $post['type'] , $post['img'], $user->id] );
+        return view('post.status' , ['status' => 'created']);
+    }
+
+    /**
+     * Receive a post ID from form and redirect into function detail 
+     * 
+     * @param \Illuminate\Http\Request $id
+     * @return function detail($id)
+     */
+    public function detailID(Request $request){
+        $id = $request->id;
+        return redirect()->route('detail' , ['id' => $id]);
     }
 
     /**
@@ -44,7 +63,29 @@ class PostController extends Controller
      * @return \Illuminate\Http\Response
      */
     public function detail($id) {
-        
+        $post = Post::findOrFail($id);
+        $user = User::find($post->user_id);
+        return view('post.detail' , ['post' => $post , 'user' => $user['name']]);
+    }
+
+    /**
+     * Show a form for receiving a post ID that needs to edit
+     * 
+     * @return view
+     */
+    public function editID() {
+        return view('post.editID');
+    }
+
+    /**
+     * Redirect to edit form corresponding to post ID
+     * 
+     * @param $request['id']
+     * @return editContent form
+     */
+    public function updateID(Request $request) {
+        $id = $request->id;
+        return redirect()->route('editContent' , ['id' => $id]);
     }
 
     /**
@@ -53,8 +94,10 @@ class PostController extends Controller
      * @param  int  $id
      * @return \Illuminate\Http\Response
      */
-    public function edit($id) {
-        
+    public function editContent($id) {
+
+        $post = Post::findOrFail($id);
+        return view('post.editContent' , ['post' => $post]);
     }
 
     /**
@@ -64,11 +107,17 @@ class PostController extends Controller
      * @param  int  $id
      * @return \Illuminate\Http\Response
      */
-    public function update(Request $request, $id) {
-        //
-    }
-    public function updateID($id) {
-        return 2;
+    public function updateContent(Request $request, $id) {
+        $post = $request->all();
+        $num = DB::table('posts')
+                   ->where('id' , '=' , $id)
+                   ->update([
+                        'title' => $post['title'],
+                        'description' => $post['description'],
+                        'type' => $post['type'],
+                        'img' =>$post['img'],
+                   ]);
+        return view('post.status' , ['status' => 'updated']);
     }
 
     /**
@@ -78,6 +127,9 @@ class PostController extends Controller
      * @return \Illuminate\Http\Response
      */
     public function delete($id) {
-        
+        $post = Post::findOrFail($id);
+        DB::table('posts')
+            ->delete($id);
+        return view('post.status' , ['status' => 'deleted']);
     }
 }
